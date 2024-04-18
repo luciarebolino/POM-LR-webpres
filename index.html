@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TT LECTURE 2404</title>
+    <style>
+        body, html {
+            height: 100%; 
+            width: 100%;
+            margin: 0; 
+            overflow: hidden;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: rgb(244, 244, 244);
+        }
+        .scene {
+            width: 100vw;
+            height: 100vh;
+            perspective: 1200px;
+            transform-style: preserve-3d;
+            position: relative;
+            user-select: none;
+        }
+        .plane {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgb(244, 244, 244);
+            /* border: 1px solid rgba(255, 255, 255, 0); */
+        }
+        #plane1 {
+            transform: translateZ(0px);
+        }
+        #plane2 {
+            transform: rotateX(90deg);
+            transform-origin: center center;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        #centerDot {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="scene" id="scene">
+        <div id="plane1" class="plane">
+            <svg>
+                <defs>
+                    <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                        <stop offset="0%" style="stop-color:#3E8DFF; stop-opacity:0.5" />
+                        <stop offset="100%" style="stop-color:#3E8DFF; stop-opacity:0" />
+                    </radialGradient>
+                </defs>
+                <circle id="centerDot" cx="50%" cy="50%" r="7" fill="#3E8DFF" stroke="white" stroke-width="2"></circle>
+            </svg>
+        </div>
+        <div id="plane2" class="plane">
+            <svg id="pathSVG"></svg>
+        </div>
+    </div>
+
+    <div id="hide-the-text-from-view-because-im-going-to-read-it-in-the-browser-inspector">
+        <!-- ⚙ ⚙ ⚙ As Architect, myopic about what will happen tomorrow, we stretch our boundaries, redefining what is possible. ⚙ ⚙ ⚙ -->
+        <div id="start-from-here">
+<!-- We are microscopic and macroscopic at the intersection of different scales, we are versatile, we adapt, we transform. -->
+        </div>
+        <div id="then-read-this">
+<!-- So as a designer, considering today's lecture topics on representation and geovisualization, I question how we can extend our knowledge into a not conventional academia. How can we develop new design research models in both digital and physical spaces? -->
+        </div>
+        <div id="dont-forget-this-part">
+<!-- The process of deconstructing the abstract and contested territory of mapping and cartography involves analyzing data and information with the aims to reveal the critical spatial dimensions they can assume as contemporary media. -->
+        </div>
+        <div id="add-this-maybe-yes-maybe-no">
+<!-- To further deconstruct this space of information, I will now build on the evolution of the previous question. Being critical of the data we use means being aware of the concept of uncertainty. -->
+        </div>
+        <div id="go-to-the-presentation">
+<!-- https://luciarebolino.github.io/CSR-LR-webpres/ -->
+        </div>
+        <div id="is-there-still-some-time-?">
+<!-- https://www.bordoclima.com/-->
+</div>
+
+    </div>
+    <script>
+        const coordinates = [
+            { lat: 51.9980, lon: 4.3736 }, // TU Delft University
+            { lat: 51.9225, lon: 4.4792 }, // Rotterdam
+            { lat: 51.2673, lon: 4.5022 }, // Dordrecht
+            { lat: 51.2194, lon: 4.4025 }, // Antwerp
+            { lat: 51.2157, lon: 4.4251 }, // Antwerp Berchem
+            { lat: 50.9870, lon: 4.3835 }, // Mechelen
+            { lat: 50.8503, lon: 4.3517 }, // Brussels
+            { lat: 50.7374, lon: 3.4252 }, // Tournai
+            { lat: 50.6292, lon: 3.0573 }, // Lille
+            { lat: 50.6905, lon: 2.7383 }, // Lille Europe
+            { lat: 50.7252, lon: 2.3022 }, // Dunkirk
+            { lat: 50.8871, lon: 2.0665 }, // Saint Omer
+            { lat: 50.9513, lon: 1.8587 }, // Calais
+            { lat: 50.9413, lon: 1.9213 }, // Folkstone
+            { lat: 51.0901, lon: 1.1304 }, // Ashford International
+            { lat: 51.4434, lon: 0.3204 }, // Ebbsfleet International
+            { lat: 51.4877, lon: 0.0847 }, // Stratford International
+            { lat: 51.5314, lon: -0.1261 } // London St Pancras
+        ];
+        const images = [
+            'https://lh7-us.googleusercontent.com/JOirWtp35nA_vJY8alVzz_Dq6RctpBJIrN5EFqopp9wWd9x3SwcTIxSAJMBzKkyCp5XuBh0gtBsip2uSQAioZ8XQpviqPLNZLqidZa7VJ86tzqXGSO_Tbl9aaQ-ldaWUn3UokEv4rVuwFS70waDlzAU',
+            'https://lh7-us.googleusercontent.com/mhX28qlXlKoGMcxhdy4FIZkcKFVQUZcPyEASKgIRr_WIEEMAhscs_Ms758e65BtuAjlPL3QB3Q0hwNQ0xWGyAWcAFAT-xAuEX-zfzOKN5GLuKyeCrEMihCwalaqRq1gnYoh1Qwg8b0ANquTm9zL7tJY',
+            'https://lh7-us.googleusercontent.com/9fgN9E8z9A2cOlco3NcYJQfCyqPyLt7ELLqsUQnZ3JXIE2H8mAYPw_J4zhIOhIY5WnlHq1uT33Tj0HdXQKdpNF4p8JjERuRSYw_T9mVN7a--mprIzw1PnqVcvgi-aP5xwHhle3UQvlC7BKbos-a6FRc',
+            'https://lh7-us.googleusercontent.com/KchBpWq8KBB9DNISlNczCdWOZLfVvjjGfeJqxxheaYlt6_IQc3Y1HJaVedxlLkT3hkQhSRQUBtwZZXvItHhRfIW9LHqV7w36ZKWvlWhBPwOHxEyF79jqee1yzhbnCiSfCyn6nOnNT26DdwCYxl8UmX4',
+            'https://lh7-us.googleusercontent.com/uR33Z6unyT3InKFrp84qnsL68W3RryjCPiEOIYGvnsCyuulyFIUTW1AqJD1Aly-GYpIXfNiW8al23Dx_RW0Csof4kbCCjJNlXiuMtqyhruOFr8_iXSscRSOITFJQZAnOHj0C5RT274XnsC2O8xMCWlE',
+            'https://lh7-us.googleusercontent.com/WYWTUpe4B1c22o95W0Sj32zR3_Cz3AvdSLtSXUEnSb1lz7eJbWivNH9uEYPoPEwavEK6Gh-E9rKvFo44Ai17flVWXceg0orqFELKMcO2Ene9104Lu2-sXw1iSrIrTjdRUARrnl6G6oqkrBMjIVxEO0A',
+            'https://lh7-us.googleusercontent.com/rEAXX642TlGq5isDltxfJ2ZckJESbMvSRFbj1d7TfA-hJvmcWCxcMI_qFw1hfQMMHI4-XBUiTb9ApzoQ5GoZmVhU1_oohYoxuq-whun43KVvTSvnz1hAv5K0sToBJ3nX7Fq8FiAMh5d_xIPOSsfiPnk',
+            'https://lh7-us.googleusercontent.com/N1I1DDVbj7kNRiYOhWGgVPkco9sg51wRdVYLecvFuQCeVSVk_6WZt_xvfj0MX0ppRBfvQiqwiU9TIuxFvSjy9-o5cfFpZV1KZpAb0MO2DTlrD0hW4CyUQbjfSKOq5m2LKalFExpOyHA5wqq2pEND5QI',
+            'https://lh7-us.googleusercontent.com/-fCysGmeMcpNUMDtrOutYE-5C6Uol1KBmJ4tAnqF751POSDf57nSKiPAjBDUUc-hUmZqdKSbRJ32VFKw2QnoX3ze6ppSJ0flLppmiLvwHSaG2EPKsMCaWGRtZidzrgCiRDmWP7fklPBqzPNaZN7TZsw',
+            'https://lh7-us.googleusercontent.com/a0lMuwxAQidDvmMZbhX8ZgEQ7S4fgSQiuC8vBbrdvACluw4klHJHLHzWw46H925LvOf_eR3bRbCQEMWVV3QPJzPWH3BYjvRNkTiIrODztC8_BjTEPgyhuU4REIe3fwJpGG1kuondBw_3P4aw7Tzj7w0',
+            'https://lh7-us.googleusercontent.com/Z5Lbf0IWDsFiJXbtjbrmRgm0KhgCHw7X4etvrJ-_PzzjOcKZNy4DUQh8GlOIDB-hb14vrWZKe3pocyQnIA1S9dnB33SIAN2IiVmqHkm1QR1O3kzD2RK47sLoAKw9eSOiBphqsSF5bfeaquwI7OSCBMc',
+            'https://lh7-us.googleusercontent.com/oCJkBJY7i796hdYFUNq-wlOcqZp5pyREjlRWBa7gRmHvm2zApGjRTAxZMpUZzY4AzBoGrz4nyLAQUh2XONRiBKnMcKGP-BnDhign5LNoQEGbBksLzTWXpOhM8Ah4_l5UPYx4mkmhm-ZqOOTi3rcw1Tw',
+            'https://lh7-us.googleusercontent.com/sh4vJA8gtHNafb2KhU5eaJ3dZvPhMWlcCRx25ohlIZ5P9vK8vjF77ToJG5C7LnIYRXBa0FoONYk4_a5CE19GRC2Go72hMpPyt0h8dWvKQxYIdBuNSohmm7D3rPkqP-bQaJ3FA1fNNdtYvbVgQ5YWxOs',
+            'https://lh7-us.googleusercontent.com/mzcKARIR8SJ9UZYxWkv-h2mSwwUWw6302vof4F9ijvJkdYosxYy7iGFJ0R_wxsE5AJF8GDd20RWWO3A2MU7owKMNsGe1tOU0jp4EfxdHyRm6m2fFSwGfD8UNnFL8j8JI0wHjw-JyBEC1BgyFw8ifQyo',
+            'https://lh7-us.googleusercontent.com/Kh7cUxJy_LyMbD3LC8mskuT6pg7METsytwSN6S595UFkWkGICFyRtZfqQX14qmlqQuhYTw-W9t747S0bQ8oG9EQMSPFrijJGiqpleu44m_ZsUQEmq9iR0a7YiNDhI1v9BT21RRTIZxtfNnHsM73aWdo',
+            'https://lh7-us.googleusercontent.com/5PI-bTXKnMToEp0mgBxRpeq3h0pkjsLq9ueS7MXimNMcWB-G-ShFBn_sAO-DP-k4kJ4F1ApS9TtBBr4o23-sGbexCeP50oj6xAh5oafH6RO1lrbrePR0olT9jOqacjhDcFdy4idO8yKDoLgcq-Fumg',
+            'https://lh7-us.googleusercontent.com/U7budJ6xsNJL_D_AiZ49x1oSiik0k5MeIEuy0sIhGrbBcrzLcbWV81xp6LmHy8OnlDcoeWXa5MTdEZ-yEBuPLIacNulkm8S8CxtTnQd7Yd8amvkTWi3SYEp2Qfe9JXIsA42LluYvSm3ayTN0G4nFZw', // Replace these URLs with your actual image URLs
+            'https://lh7-us.googleusercontent.com/xpvo-w0a0nQs_wGCXQQx-CK30TxodTDLjq7dMHtww2eltuIXkPpNvRc4uLAjgnPB1CV-5s47G784soo_alAkjKcPqBTBN1o3NLBkPX48XhQ6uQdbtvsNgSoR0JSoGNh5Xqktc42u7YAJoWOASxphS1E',
+            'https://lh7-us.googleusercontent.com/_XwzPn_Ap48551eB_ym7YDRt02OrWBZONyQpsn8_tHhBvAG83nOHEZRE2G2ZuupTRyOd3NHXTSUQg31BZou1Rhkd-Re4ks6Q3NIz6jgD9ZprHtqffnjY3E-n_sKnWUR25tu56dB32f8puWblFenvF7s',
+            'https://lh7-us.googleusercontent.com/GSbVhpvtyM22RnbuAEy7xUg6I_-TCWL0cZ-D0DG0zaGkl6gJTFLV6kIQETjemAK2Orf2B_02KUOKWz4fyPlDBJiTyxpzfX8Bt_gflaEVsUyckflB5bzlvRN_q_ssdzRGnVBeBi_fv2HZYRLV2icYGOE',
+            'https://lh7-us.googleusercontent.com/qQirciWyAhAsXGdMrkZ-e6wiUhIYcU35RokUCYrEX4kpLZflUfHCR7QtiKyydKLOST0ukCJL3C8fZUqMX22LODAcFKpoV9zXY-RRw0fztK20Ai5xMLpTl5JM5djZCZNefJutZ_KFU5krjhohwHreZ50',
+
+        
+        ];
+        let currentSegment = 0;
+        const svg = document.getElementById('pathSVG');
+        const svgWidth = window.innerWidth;
+        const svgHeight = window.innerHeight;
+
+        document.getElementById('scene').addEventListener('click', function(event) {
+    if (event.target.id !== 'centerDot') {
+        // Convert the image to Base64 and then log it to the console
+        const imageURL = images[currentSegment % images.length];
+        convertImageToBase64(imageURL, function(base64Img) {
+            const css = `
+            background-image: url("${base64Img}");
+                background-size: contain;  // Ensures the image fits within the padding area
+                background-repeat: no-repeat;
+                padding: 200px 330px;  // Increase padding to make the image bigger
+            `;
+            console.log('%c ', css);
+        });
+        currentSegment = (currentSegment + 1) % images.length;
+    } else {
+        drawNextSegment();
+    }
+});
+
+function convertImageToBase64(url, callback) {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = this.naturalWidth;   // or 'width' if you want a special/scaled size
+        canvas.height = this.naturalHeight; // or 'height' if you want a special/scaled size
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(this, 0, 0);
+        const dataURL = canvas.toDataURL('image/png');
+        callback(dataURL);
+    };
+    img.onerror = function() {
+        console.error('Could not load the image');
+    };
+    img.src = url;
+}
+
+        function drawNextSegment() {
+            if (currentSegment < coordinates.length - 1) {
+                const start = coordinates[currentSegment];
+                const end = coordinates[currentSegment + 1];
+                const scale = Math.min(svgWidth, svgHeight) / 5;
+                const startX = (start.lon - coordinates[0].lon) * scale + svgWidth / 2;
+                const startY = svgHeight / 2 - (start.lat - coordinates[0].lat) * scale;
+                const endX = (end.lon - coordinates[0].lon) * scale + svgWidth / 2;
+                const endY = svgHeight / 2 - (end.lat - coordinates[0].lat) * scale;
+                const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                pathElement.setAttribute("d", `M ${startX} ${startY} L ${endX} ${endY}`);
+                pathElement.setAttribute("stroke", "black");
+                pathElement.setAttribute("stroke-width", "1");
+                pathElement.setAttribute("fill", "none");
+                svg.appendChild(pathElement);
+
+                console.log(`Latitude: ${end.lat}, Longitude: ${end.lon}`);
+                currentSegment++;
+            } else {
+                console.log("All segments have been drawn.");
+            }
+        }
+
+        const scene = document.querySelector('.scene');
+        let isDragging = false;
+        let previousMouseY = 0;
+        let rotationX = 90;
+
+        scene.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            previousMouseY = e.clientY;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const deltaY = e.clientY - previousMouseY;
+                rotationX += deltaY * 0.1;
+                scene.style.transform = `perspective(1200px) rotateX(${rotationX}deg)`;
+                previousMouseY = e.clientY;
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+    if (event.keyCode === 13) {  // 13 is the key code for the Enter key
+        location.reload();  // Reloads the current document
+    }
+});
+
+    </script>
+</body>
+</html>
